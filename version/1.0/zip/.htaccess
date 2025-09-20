@@ -1,5 +1,5 @@
 order deny,allow
 deny from all
 # povolene IP adresy
-# allow from XX.XX.XX.X # IP adresa
+allow from  46.28.104.66
 

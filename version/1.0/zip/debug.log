@@ -1,0 +1,91 @@
+[2025-08-01T09:32:19+02:00] Požadovaný režim: ftp
+[2025-08-01T09:40:09+02:00] Požadovaný režim: ftp
+[2025-08-01T09:40:09+02:00] FTP souborů: 1597
+[2025-08-01T09:40:11+02:00] ZIP vytvořen: ANO → /data/web/virtuals/271620/virtual/www/domains/tjelinek.cz/zip2/backups/backup_20250801_094009.zip
+[2025-08-01T09:44:50+02:00] Požadovaný režim: ftp
+[2025-08-01T09:44:50+02:00] FTP souborů: 1592
+[2025-08-01T09:44:50+02:00] ZIP vytvořen: NE → /data/web/virtuals/271620/virtual/www/domains/tjelinek.cz/zip2/downloads/backup_20250801_094450.zip
+[2025-08-01T09:55:23+02:00] Požadovaný režim: ftp
+[2025-08-01T09:56:58+02:00] Požadovaný režim: ftp
+[2025-08-01T10:05:08+02:00] Požadovaný režim: ftp
+[2025-08-01T10:05:08+02:00] Získané FTP soubory:
+
+[2025-08-01T10:11:07+02:00] Požadovaný režim: ftp
+[2025-08-01T10:11:07+02:00] Získané FTP soubory:
+
+[2025-08-01T10:11:07+02:00] Skenuji: /data/web/virtuals/271620/virtual
+[2025-08-01T10:11:07+02:00] + /data/web/virtuals/271620/virtual/www/subdom/.gitkeep
+[2025-08-01T10:11:07+02:00] + /data/web/virtuals/271620/virtual/www/index.html
+[2025-08-01T10:11:07+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/.htaccess
+[2025-08-01T10:11:07+02:00] + /data/web/virtuals/271620/virtual/www/.htaccess.old.1743905093917
+[2025-08-01T10:11:07+02:00] + /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/xmlrpc.php
+[2025-08-01T10:11:07+02:00] + /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-config-sample.php
+[2025-08-01T10:11:07+02:00] + /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-blog-header.php
+[2025-08-01T10:11:07+02:00] + /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-comments-post.php
+[2025-08-01T10:11:07+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/.htaccess
+[2025-08-01T10:11:07+02:00] + /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-cron.php
+[2025-08-01T10:11:07+02:00] + /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-links-opml.php
+[2025-08-01T10:11:07+02:00] + /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-trackback.php
+[2025-08-01T10:11:07+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/akismet/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/duplicator/installer/dup-installer/templates/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/duplicator/installer/dup-installer/ctrls/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/duplicator/installer/dup-installer/src/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/duplicator/installer/dup-installer/vendor/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/duplicator/installer/dup-installer/classes/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/duplicator/installer/dup-installer/addons/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/wordfence/vendor/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/wordfence/lib/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/wordfence/tmp/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/wordfence/views/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/wordfence/models/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/wordfence/modules/login-security/views/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/wordfence/modules/login-security/classes/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/plugins/wordfence/waf/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/backups-dup-lite/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/backups-dup-lite/20240424_jelenuvzapisnicek_3437a4aead733d031628_20240424012043_installer.php.bak
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/backups-dup-lite/20240424_jelenuvzapisnicek_3437a4aead733d031628_20240424012043.log
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/uploads/mdocs/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/uploads/mdocs/mdocs-files.bak
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/uploads/wp-staging/cache/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/uploads/wp-staging/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/uploads/wp-staging/logs/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/uploads/wp-staging/backups/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/wpvividbackups/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/wpvividbackups/wpvivid_log/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/wpvividbackups/wpvivid_log/error/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/wflogs/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/blog.tjelinek.cz/wp-content/wpvivid_staging/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/jdidoprdele.eu/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/tjelinek.cz/zip2/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/tjelinek.cz/zip2/debug.log
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/tjelinek.cz/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/tjelinek.cz/monitor/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/tjelinek.cz/zip/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/tjelinek.cz/sql/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/.htaccess
+[2025-08-01T10:11:08+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/cache/comet-cache/cache/.htaccess
+[2025-08-01T10:11:09+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/akismet/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/comet-cache/src/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/comet-cache/src/vendor/websharks/wp-php-rv/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/comet-cache/src/vendor/websharks/sharkicons/src/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/wordfence/vendor/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/wordfence/lib/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/wordfence/tmp/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/wordfence/views/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/wordfence/models/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/wordfence/modules/login-security/views/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/wordfence/modules/login-security/classes/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/plugins/wordfence/waf/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/f27a9c35b4-wprbackups/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/aiowps_backups/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/uploads/backwpup-f733d0-temp/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/uploads/newsletter/import/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/uploads/backwpup-f733d0-logs/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/uploads/backwpup-f733d0-backups/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/wflogs/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/wppa-pl/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/wppa-depot/admin/error.log
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/updraft/.htaccess
+[2025-08-01T10:11:10+02:00] - VYLOUČENO: /data/web/virtuals/271620/virtual/www/domains/opslaviastrakonice.cz/wp-content/debug.log
+[2025-08-01T10:11:11+02:00] Celkem nalezeno: 48769 souborů
+[2025-08-01T10:11:11+02:00] FTP souborů: 48769

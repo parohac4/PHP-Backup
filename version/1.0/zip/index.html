@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Záloha webu</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    progress { width: 100%; height: 20px; }
+    #start-btn { padding: 0.5rem 1rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+
+  <h1>Záloha webu</h1>
+
+  <label for="mode">Co chceš zálohovat?</label><br>
+  <select id="mode">
+    <option value="both">Soubory + databáze</option>
+    <option value="ftp">Pouze soubory (FTP)</option>
+    <option value="dump">Pouze databáze (MySQL)</option>
+  </select>
+
+  <br><br>
+  <button id="start-btn">Spustit zálohu</button>
+
+  <div id="progress-wrapper" style="display:none;">
+    <progress id="progress-bar" max="100" value="0"></progress>
+    <span id="progress-label">0 %</span>
+  </div>
+
+  <div id="result"></div>
+
+  <script>
+    let csrfToken = null;
+
+    async function getCsrfToken() {
+      const res = await fetch('zip.php');
+      const data = await res.json();
+      csrfToken = data.csrf_token;
+    }
+
+    async function startBackup() {
+      document.getElementById('progress-wrapper').style.display = 'block';
+      document.getElementById('progress-bar').value = 5;
+      document.getElementById('progress-label').textContent = '5 %';
+
+      const mode = document.getElementById('mode').value;
+
+      const response = await fetch('zip.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ csrf_token: csrfToken, mode: mode })
+      });
+
+      const result = await response.json();
+      document.getElementById('progress-bar').value = 100;
+      document.getElementById('progress-label').textContent = '100 %';
+
+      const div = document.getElementById('result');
+      div.innerHTML = '';
+
+      if (result.zipUrl) {
+        const link = document.createElement('a');
+        link.href = result.zipUrl;
+        link.download = '';
+        link.textContent = 'Stáhnout zálohu';
+        div.appendChild(link);
+      }
+
+      if (result.cloudUrl) {
+        const cloud = document.createElement('p');
+        cloud.innerHTML = 'Záloha odeslána na <a href="' + result.cloudUrl + '" target="_blank">S3</a>.';
+        div.appendChild(cloud);
+      }
+    }
+
+    document.getElementById('start-btn').addEventListener('click', () => {
+      startBackup();
+    });
+
+    getCsrfToken();
+  </script>
+</body>
+</html>
