@@ -1,0 +1,7 @@
+<Files "db_dump.php">
+    Order Deny,Allow
+    Deny from all
+    Allow from XXX
+    # nebo pro rozsah s maskou
+    # Allow from XXX/24
+</Files>

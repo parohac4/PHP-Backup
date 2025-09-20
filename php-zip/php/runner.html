@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Inkrementální záloha</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  /* Výchozí (podle systému) */
+  :root{
+    --bg:#f6f7fb; --card:#fff; --text:#1b1f24; --muted:#5f6b7a;
+    --primary:#2563eb; --primary-600:#1d4ed8; --ring:rgba(37,99,235,.2);
+    --border:#e5e7eb; --ok:#16a34a; --warn:#ca8a04; --err:#dc2626;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0b0f14; --card:#0f141b; --text:#e5e7eb; --muted:#a3adb8;
+      --primary:#3b82f6; --primary-600:#2563eb; --ring:rgba(59,130,246,.25);
+      --border:#1f2937; --ok:#22c55e; --warn:#eab308; --err:#ef4444;
+    }
+  }
+
+  /* Ruční override pomocí data-theme */
+  [data-theme="light"]{
+    --bg:#f6f7fb; --card:#fff; --text:#1b1f24; --muted:#5f6b7a;
+    --primary:#2563eb; --primary-600:#1d4ed8; --ring:rgba(37,99,235,.2);
+    --border:#e5e7eb; --ok:#16a34a; --warn:#ca8a04; --err:#dc2626;
+  }
+  [data-theme="dark"]{
+    --bg:#0b0f14; --card:#0f141b; --text:#e5e7eb; --muted:#a3adb8;
+    --primary:#3b82f6; --primary-600:#2563eb; --ring:rgba(59,130,246,.25);
+    --border:#1f2937; --ok:#22c55e; --warn:#eab308; --err:#ef4444;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:radial-gradient(1200px 600px at 10% -10%, rgba(37,99,235,.06), transparent),
+               radial-gradient(1000px 500px at 110% 10%, rgba(16,185,129,.05), transparent),
+               var(--bg);
+    color:var(--text); font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    display:grid; place-items:center; padding:24px;
+  }
+  .card{
+    width:100%; max-width:720px; background:var(--card);
+    border:1px solid var(--border); border-radius:16px; padding:24px;
+    box-shadow:0 10px 30px rgba(0,0,0,.07); position:relative;
+  }
+  /* Přepínač vzhledu */
+  .theme-toggle{
+    position:absolute; top:12px; right:12px;
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 10px; border-radius:10px; border:1px solid var(--border);
+    background:transparent; color:var(--text); cursor:pointer;
+  }
+  .theme-toggle:hover{box-shadow:0 0 0 4px var(--ring)}
+  .theme-toggle svg{display:block}
+
+  h1{margin:0 0 8px; font-size:1.25rem}
+  .sub{margin:0 0 20px; color:var(--muted); font-size:.95rem}
+
+  .row{display:grid; grid-template-columns:1fr auto; gap:12px; align-items:end; margin-bottom:16px}
+  .field label{display:block; font-size:.9rem; color:var(--muted); margin-bottom:6px}
+  .field input{
+    width:100%; padding:12px 14px; border:1px solid var(--border); background:transparent; color:inherit;
+    border-radius:10px; outline:none; transition:border .15s, box-shadow .15s;
+  }
+  .field input:focus{border-color:var(--primary); box-shadow:0 0 0 4px var(--ring)}
+  button{
+    padding:12px 16px; border:0; border-radius:10px; background:var(--primary); color:#fff; font-weight:600;
+    cursor:pointer; transition:transform .05s ease, background .15s;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  button:hover{background:var(--primary-600)}
+  button:active{transform:translateY(1px)}
+  button[disabled]{opacity:.6; cursor:not-allowed}
+
+  .status{
+    display:flex; align-items:center; gap:10px; margin:8px 0 14px;
+    font-size:.95rem; color:var(--muted);
+  }
+  .dot{width:10px; height:10px; border-radius:50%; background:var(--muted)}
+  .dot.run{background:var(--primary); box-shadow:0 0 0 6px var(--ring)}
+  .dot.ok{background:var(--ok)}
+  .dot.err{background:var(--err)}
+
+  .progress{
+    width:100%; height:14px; background:linear-gradient(180deg, #0000, rgba(0,0,0,.04));
+    border:1px solid var(--border); border-radius:999px; overflow:hidden; position:relative;
+  }
+  .bar{
+    position:absolute; inset:0; width:0%;
+    background:linear-gradient(90deg, var(--primary), var(--primary-600));
+    transition:width .25s ease;
+  }
+  .meta{display:flex; justify-content:space-between; margin-top:6px; font-size:.9rem; color:var(--muted)}
+
+  .actions{display:flex; gap:10px; margin-top:14px}
+  .link-btn{
+    display:none; padding:10px 14px; border-radius:10px; text-decoration:none; color:#fff; background:var(--ok); font-weight:600;
+  }
+  .hint{margin-top:8px; font-size:.85rem; color:var(--muted)}
+
+  .log{
+    margin-top:18px; padding:12px; border:1px dashed var(--border); border-radius:12px; background:transparent;
+    max-height:180px; overflow:auto; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.85rem;
+  }
+
+  .toast{
+    position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px);
+    background:var(--err); color:#fff; padding:10px 14px; border-radius:10px; box-shadow:0 10px 24px rgba(0,0,0,.2);
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+  <div class="card" role="region" aria-labelledby="h">
+    <!-- Přepínač vzhledu -->
+    <button class="theme-toggle" id="themeBtn" type="button" aria-label="Přepnout vzhled">
+      <svg id="sun" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zm10.48 14.32l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM12 4V1h-1v3h1zm0 19v-3h-1v3h1zM4 12H1v1h3v-1zm19 0h-3v1h3v-1zM6.76 19.16l-1.42 1.42-1.79-1.8 1.41-1.41 1.8 1.79zM19.16 6.76l1.42-1.42 1.79 1.8-1.41 1.41-1.8-1.79zM12 7a5 5 0 100 10A5 5 0 0012 7z"/></svg>
+      <svg id="moon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></svg>
+      <span id="themeLabel">Systém</span>
+    </button>
+
+    <h1 id="h">Inkrementální záloha</h1>
+    <p class="sub">Záloha probíhá po dávkách, aby se vešla do limitů hostingu. Po dokončení se nabídne stažení ZIP.</p>
+
+    <div class="row">
+      <div class="field">
+        <label for="token">Token</label>
+        <input id="token" type="password" name="token" autocomplete="off" placeholder="Sem vlož token" aria-required="true">
+      </div>
+      <div>
+        <button id="startBtn" type="button" aria-live="polite">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 5v14l11-7-11-7z" fill="currentColor"/></svg>
+          Spustit zálohu
+        </button>
+      </div>
+    </div>
+
+    <div class="status" id="statusRow" aria-live="polite">
+      <span class="dot" id="dot"></span>
+      <span id="statusText">Připraveno</span>
+    </div>
+
+    <div class="progress" aria-label="Průběh zálohy">
+      <div class="bar" id="bar"></div>
+    </div>
+    <div class="meta">
+      <span id="count">0 / 0</span>
+      <span id="pct">0%</span>
+    </div>
+
+    <div class="actions">
+      <a id="downloadLink" class="link-btn" download>Stáhnout ZIP</a>
+      <button id="resetBtn" type="button" style="display:none">Nová záloha</button>
+    </div>
+
+    <div class="hint">Tip: zavři okno až po stažení. Při chybě zkus menší dávku (v kódu <code>batch</code>).</div>
+
+    <div class="log" id="log" aria-live="polite"></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="assertive">Chyba</div>
+
+<script>
+const $ = s=>document.querySelector(s);
+const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+
+/* === Přepínač vzhledu === */
+const themeBtn = $('#themeBtn');
+const themeLabel = $('#themeLabel');
+const sun = $('#sun'); const moon = $('#moon');
+
+function applyTheme(mode){ // 'light' | 'dark' | 'system'
+  if (mode === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    themeLabel.textContent = 'Světlo';
+    sun.style.display='block'; moon.style.display='none';
+  } else if (mode === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    themeLabel.textContent = 'Tma';
+    sun.style.display='none'; moon.style.display='block';
+  } else {
+    document.documentElement.removeAttribute('data-theme'); // systémové
+    themeLabel.textContent = 'Systém';
+    // podle aktuální preference přepneme ikonku
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    sun.style.display = prefersDark ? 'none' : 'block';
+    moon.style.display = prefersDark ? 'block' : 'none';
+  }
+}
+
+function cycleTheme(){
+  const current = localStorage.getItem('theme') || 'system';
+  const next = current === 'system' ? 'light' : current === 'light' ? 'dark' : 'system';
+  localStorage.setItem('theme', next);
+  applyTheme(next);
+}
+
+(function initTheme(){
+  const saved = localStorage.getItem('theme') || 'system';
+  applyTheme(saved);
+  // reaguj na změnu systémového režimu v reálném čase (pouze v režimu 'system')
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  mq.addEventListener?.('change', () => {
+    if ((localStorage.getItem('theme') || 'system') === 'system') applyTheme('system');
+  });
+})();
+themeBtn.addEventListener('click', cycleTheme);
+
+/* === UI a logika běhu zálohy (beze změn) === */
+const elStart = $('#startBtn');
+const elReset = $('#resetBtn');
+const elDL    = $('#downloadLink');
+const elBar   = $('#bar');
+const elCount = $('#count');
+const elPct   = $('#pct');
+const elStatus= $('#statusText');
+const elDot   = $('#dot');
+const elLog   = $('#log');
+const elToast = $('#toast');
+
+let running = false;
+
+function toast(msg){
+  elToast.textContent = msg;
+  elToast.classList.add('show');
+  setTimeout(()=>elToast.classList.remove('show'), 2400);
+}
+function log(msg){
+  const t = new Date().toLocaleTimeString();
+  elLog.textContent += `[${t}] ${msg}\n`;
+  elLog.scrollTop = elLog.scrollHeight;
+}
+function uiState(state){ elDot.className = 'dot ' + (state==='run'?'run':state==='ok'?'ok':state==='err'?'err':''); }
+
+async function startBackup(){
+  const token = $('#token').value.trim();
+  if (!token) { toast('Zadej token'); $('#token').focus(); return; }
+
+  running = true;
+  elStart.disabled = true;
+  elReset.style.display = 'none';
+  elDL.style.display = 'none';
+  uiState('run');
+  elStatus.textContent = 'Připravuji seznam souborů…';
+  elBar.style.width = '0%';
+  elPct.textContent = '0%';
+  elCount.textContent = '0 / 0';
+  elLog.textContent = '';
+
+  try {
+    const fd = new FormData(); fd.set('token', token);
+    const res = await fetch('start-backup.php', { method:'POST', body:fd });
+    if (!res.ok) throw new Error(await res.text());
+    const j = await res.json();
+    const jobId = j?.job?.id; let total = j?.job?.total ?? 0;
+    if (!jobId) throw new Error('Neplatná odpověď START');
+
+    log(`Nalezeno souborů: ${total}. Zahajuji zpracování…`);
+    elStatus.textContent = 'Zpracovávám…';
+
+    let pos = 0;
+    const batch = 300;
+    while (running) {
+      const fd2 = new FormData();
+      fd2.set('token', token);
+      fd2.set('job_id', jobId);
+      fd2.set('batch', String(batch));
+
+      const r2 = await fetch('step-backup.php', { method:'POST', body:fd2 });
+      if (!r2.ok) throw new Error(`STEP: ${await r2.text()}`);
+
+      const sj = await r2.json();
+      pos = sj?.job?.pos ?? pos;
+      total = sj?.job?.total ?? total;
+      const done = !!sj?.job?.done;
+
+      const pct = total ? Math.floor(pos*100/total) : 0;
+      elBar.style.width = pct + '%';
+      elPct.textContent = pct + '%';
+      elCount.textContent = `${pos} / ${total}`;
+
+      if (done) {
+  uiState('ok');
+  elStatus.textContent = 'Hotovo. Připravuji stažení…';
+
+  const url = `download-backup.php?job=${encodeURIComponent(jobId)}&token=${encodeURIComponent(token)}`;
+  elDL.href = url;
+  elDL.style.display = '';
+  elDL.textContent = 'Stáhnout ZIP';
+
+  // 👇 AUTOSTART stažení
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '';              // nech názvem z Content-Disposition
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    log('Automatické stažení spuštěno.');
+  } catch (e) {
+    log('Automatické stažení se nepodařilo — použij odkaz „Stáhnout ZIP“.');
+  }
+
+  elReset.style.display = '';
+  elStatus.textContent = 'Hotovo. Soubor je připraven ke stažení.';
+  log('Záloha dokončena.');
+  running = false;
+  elStart.disabled = false;
+  break;
+}
+      await sleep(900);
+    }
+  } catch (e){
+    uiState('err');
+    elStatus.textContent = 'Chyba – viz log';
+    toast(String(e.message || e));
+    log(String(e.message || e));
+    running = false;
+    elStart.disabled = false;
+    elReset.style.display = '';
+  }
+}
+
+elStart.addEventListener('click', ()=> { if (!running) startBackup(); });
+elReset.addEventListener('click', ()=>{
+  if (running) return;
+  elBar.style.width = '0%'; elPct.textContent='0%'; elCount.textContent='0 / 0';
+  elDL.style.display='none'; elReset.style.display='none';
+  elStatus.textContent='Připraveno'; uiState('');
+});
+</script>
+</body>
+</html>

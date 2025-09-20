@@ -1,0 +1,23 @@
+# public/.htaccess
+
+# --- Bezpečné hlavičky ---
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# --- Skryj VCS ---
+RedirectMatch 404 ^/(?:\.git|\.svn|\.hg)/
+
+# --- Chraň citlivé PHP ---
+<FilesMatch "^(config\.php|common\.php)$">
+  Require all denied
+</FilesMatch>
+
+# --- Omezení pro backup.php a runner.html ---
+<FilesMatch "^(backup\.php|runner\.html)$">
+  # povol jen vybrané IP adresy
+  Require ip XXX
+</FilesMatch>
