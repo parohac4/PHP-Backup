@@ -9,7 +9,7 @@ Najdeš zde jak skripty v PHP, tak i pomocné Bash skripty. Každý nástroj má
 Projekt pro **zazipování obsahu na FTP**.  
 - PHP skript i Bash skript pro vytvoření zálohy souborů.  
 - Možnost generování a použití tokenu pro spuštění.  
-- Detailní návod najdeš v [`php-zip/README.md`](php-zip/README.md).
+- Detailní návod najdeš v [`php-zip/README.md`](php-zip/php/README.md).
 
 ---
 
