@@ -309,9 +309,14 @@ async function startBackup(){
       a.download = '';
       document.body.appendChild(a);
       a.click();
-      a.remove();
-      setTimeout(()=>URL.revokeObjectURL(u), 2000);
-      log('Automatické stažení spuštěno.');
+a.remove();
+
+// zpřístupni opakované stažení bez dalšího požadavku na server
+elDL.href = u;                    // ponecháme blob URL
+elDL.download = '';               // použije název z Content-Disposition
+elDL.textContent = 'Stáhnout ZIP (znovu)';
+elDL.onclick = null;              // ať funguje jako normální odkaz bez JS
+log('Automatické stažení spuštěno.');
     } catch (e) {
   log('Automatické stažení se nepodařilo — použij tlačítko níže pro stažení.');
 }
@@ -342,6 +347,15 @@ async function startBackup(){
 elStart.addEventListener('click', ()=> { if (!running) startBackup(); });
 elReset.addEventListener('click', ()=>{
   if (running) return;
+
+  // uvolni případnou blob URL z minula
+  if (elDL.href && elDL.href.startsWith('blob:')) {
+    URL.revokeObjectURL(elDL.href);
+  }
+  elDL.removeAttribute('href');
+  elDL.textContent = 'Stáhnout ZIP (ručně)';
+  elDL.onclick = null; // při dalším dokončení se znovu nastaví
+
   elBar.style.width = '0%'; elPct.textContent='0%'; elCount.textContent='0 / 0';
   elDL.style.display='none'; elReset.style.display='none';
   elStatus.textContent='Připraveno'; uiState('');
