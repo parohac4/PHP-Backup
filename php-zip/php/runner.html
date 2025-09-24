@@ -294,7 +294,8 @@ async function startBackup(){
         const doDownload = async ()=>{
     try {
       const fd3 = new FormData();
-      fd3.set('job', jobId);
+    fd3.set('job', jobId);
+    fd3.set('token', token); // ← přidej tento řádek (fallback, když server nepředá Authorization)
       const r3 = await fetch('download-backup.php', {
         method: 'POST',
         body: fd3,
