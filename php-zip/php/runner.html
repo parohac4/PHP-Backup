@@ -288,8 +288,8 @@ async function startBackup(){
         elStatus.textContent = 'Hotovo. Připravuji stažení…';
 
         // Připravit POST stáhnutí bez tokenu v URL
-        elDL.style.display = '';
-        elDL.textContent = 'Stáhnout ZIP';
+        elDL.style.display = 'inline-flex';
+        elDL.textContent = 'Stáhnout ZIP (ručně)';
 
         const doDownload = async ()=>{
     try {
@@ -312,8 +312,8 @@ async function startBackup(){
       setTimeout(()=>URL.revokeObjectURL(u), 2000);
       log('Automatické stažení spuštěno.');
     } catch (e) {
-      log('Automatické stažení se nepodařilo — klikni na „Stáhnout ZIP“.');
-    }
+  log('Automatické stažení se nepodařilo — použij tlačítko níže pro stažení.');
+}
   };
         // připojit ruční fallback na odkaz
         elDL.onclick = (ev)=>{ ev.preventDefault(); doDownload(); };
