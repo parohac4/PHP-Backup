@@ -284,40 +284,53 @@ async function startBackup(){
       elCount.textContent = `${pos} / ${total}`;
 
       if (done) {
-  uiState('ok');
-  elStatus.textContent = 'Hotovo. Připravuji stažení…';
+        uiState('ok');
+        elStatus.textContent = 'Hotovo. Připravuji stažení…';
 
-  const url = `download-backup.php?job=${encodeURIComponent(jobId)}&token=${encodeURIComponent(token)}`;
-  elDL.href = url;
-  elDL.style.display = '';
-  elDL.textContent = 'Stáhnout ZIP';
+        // Připravit POST stáhnutí bez tokenu v URL
+        elDL.style.display = '';
+        elDL.textContent = 'Stáhnout ZIP';
 
-  // 👇 AUTOSTART stažení
-  try {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = '';              // nech názvem z Content-Disposition
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    log('Automatické stažení spuštěno.');
-  } catch (e) {
-    log('Automatické stažení se nepodařilo — použij odkaz „Stáhnout ZIP“.');
-  }
-
-  elReset.style.display = '';
-  elStatus.textContent = 'Hotovo. Soubor je připraven ke stažení.';
-  log('Záloha dokončena.');
-  running = false;
-  elStart.disabled = false;
-  break;
-}
+        const doDownload = async ()=>{
+    try {
+      const fd3 = new FormData();
+      fd3.set('job', jobId);
+      const r3 = await fetch('download-backup.php', {
+        method: 'POST',
+        body: fd3,
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!r3.ok) throw new Error(await r3.text());
+      const blob = await r3.blob();
+      const a = document.createElement('a');
+      const u = URL.createObjectURL(blob);
+      a.href = u;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(u), 2000);
+      log('Automatické stažení spuštěno.');
+    } catch (e) {
+      log('Automatické stažení se nepodařilo — klikni na „Stáhnout ZIP“.');
+    }
+  };
+        // připojit ruční fallback na odkaz
+        elDL.onclick = (ev)=>{ ev.preventDefault(); doDownload(); };
+        doDownload();
+        elReset.style.display = '';
+        elStatus.textContent = 'Hotovo. Soubor je připraven ke stažení.';
+        log('Záloha dokončena.');
+        running = false;
+        elStart.disabled = false;
+        break;
+      }
       await sleep(900);
     }
   } catch (e){
     uiState('err');
     elStatus.textContent = 'Chyba – viz log';
-    toast(String(e.message || e));
+    // chyba podrobně zalogujeme níže
     log(String(e.message || e));
     running = false;
     elStart.disabled = false;

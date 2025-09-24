@@ -9,6 +9,8 @@ function cfg(): array {
 function no_cache(): void {
   header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
   header('Pragma: no-cache');
+  header('X-Content-Type-Options: nosniff');
+  header('Referrer-Policy: no-referrer');
 }
 function fail(int $code, string $msg): never {
   http_response_code($code); no_cache();
@@ -29,9 +31,15 @@ function require_auth(array $cfg): void {
   if (!allow_ip($cfg['allow_ips'])) fail(403, 'Forbidden (IP)');
   if (!empty($cfg['require_https']) && (($_SERVER['HTTPS'] ?? 'off') !== 'on')) fail(400, 'HTTPS required');
 
-  // 👇 POST má přednost, ale GET fallback ponecháme
-  $token = $_POST['token'] ?? ($_GET['token'] ?? '');
+  // Token pouze z POST nebo z Authorization: Bearer (žádný GET)
+  $token = $_POST['token'] ?? '';
   $token = is_string($token) ? trim($token) : '';
+  if ($token === '') {
+    $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['Authorization'] ?? '');
+    if (is_string($auth) && stripos($auth, 'Bearer ') === 0) {
+      $token = trim(substr($auth, 7));
+    }
+  }
   $tCfg  = (string)$cfg['token'];
 
   if ($token === '' || $tCfg === '' || !hash_equals($tCfg, $token)) {
