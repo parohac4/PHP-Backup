@@ -5,12 +5,20 @@ no_cache();
 
 $cfg = cfg(); require_auth($cfg);
 
-$jobId = (string)($_GET['job'] ?? '');
+// read job from POST (no GET) and validate format
+$jobId = (string)($_POST['job'] ?? '');
 if ($jobId === '') fail(400, 'Missing job');
+if (!preg_match('~^\d{8}-\d{6}-[0-9a-f]{8}$~', $jobId)) fail(400, 'Invalid job');
 
 [$root, $outDir] = root_paths($cfg);
-$jobDir = $outDir . '/jobs/' . $jobId;
-$stateFile = $jobDir . '/state.json';
+$jobsBase = realpath($outDir . '/jobs') ?: '';
+if ($jobsBase === '' || !is_dir($jobsBase)) fail(500, 'Jobs dir missing');
+
+$jobDir = $jobsBase . DIRECTORY_SEPARATOR . $jobId;
+$jobDirReal = realpath($jobDir) ?: '';
+if ($jobDirReal === '' || !str_starts_with($jobDirReal, $jobsBase . DIRECTORY_SEPARATOR)) fail(404, 'Job not found');
+
+$stateFile = $jobDirReal . '/state.json';
 if (!is_file($stateFile)) fail(404, 'Job not found');
 
 $state = json_decode(file_get_contents($stateFile), true);
@@ -30,4 +38,4 @@ if ($fh) { while (!feof($fh)) { echo fread($fh, 8192); @ob_flush(); flush(); } f
 // uklid složku jobu
 @unlink($state['list']);
 @unlink($stateFile);
-@rmdir($jobDir);
+@rmdir($jobDirReal);

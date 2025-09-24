@@ -284,40 +284,59 @@ async function startBackup(){
       elCount.textContent = `${pos} / ${total}`;
 
       if (done) {
-  uiState('ok');
-  elStatus.textContent = 'Hotovo. Připravuji stažení…';
+        uiState('ok');
+        elStatus.textContent = 'Hotovo. Připravuji stažení…';
 
-  const url = `download-backup.php?job=${encodeURIComponent(jobId)}&token=${encodeURIComponent(token)}`;
-  elDL.href = url;
-  elDL.style.display = '';
-  elDL.textContent = 'Stáhnout ZIP';
+        // Připravit POST stáhnutí bez tokenu v URL
+        elDL.style.display = 'inline-flex';
+        elDL.textContent = 'Stáhnout ZIP (ručně)';
 
-  // 👇 AUTOSTART stažení
-  try {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = '';              // nech názvem z Content-Disposition
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    log('Automatické stažení spuštěno.');
-  } catch (e) {
-    log('Automatické stažení se nepodařilo — použij odkaz „Stáhnout ZIP“.');
-  }
+        const doDownload = async ()=>{
+    try {
+      const fd3 = new FormData();
+    fd3.set('job', jobId);
+    fd3.set('token', token); // ← přidej tento řádek (fallback, když server nepředá Authorization)
+      const r3 = await fetch('download-backup.php', {
+        method: 'POST',
+        body: fd3,
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!r3.ok) throw new Error(await r3.text());
+      const blob = await r3.blob();
+      const a = document.createElement('a');
+      const u = URL.createObjectURL(blob);
+      a.href = u;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+a.remove();
 
-  elReset.style.display = '';
-  elStatus.textContent = 'Hotovo. Soubor je připraven ke stažení.';
-  log('Záloha dokončena.');
-  running = false;
-  elStart.disabled = false;
-  break;
+// zpřístupni opakované stažení bez dalšího požadavku na server
+elDL.href = u;                    // ponecháme blob URL
+elDL.download = '';               // použije název z Content-Disposition
+elDL.textContent = 'Stáhnout ZIP (znovu)';
+elDL.onclick = null;              // ať funguje jako normální odkaz bez JS
+log('Automatické stažení spuštěno.');
+    } catch (e) {
+  log('Automatické stažení se nepodařilo — použij tlačítko níže pro stažení.');
 }
+  };
+        // připojit ruční fallback na odkaz
+        elDL.onclick = (ev)=>{ ev.preventDefault(); doDownload(); };
+        doDownload();
+        elReset.style.display = '';
+        elStatus.textContent = 'Hotovo. Soubor je připraven ke stažení.';
+        log('Záloha dokončena.');
+        running = false;
+        elStart.disabled = false;
+        break;
+      }
       await sleep(900);
     }
   } catch (e){
     uiState('err');
     elStatus.textContent = 'Chyba – viz log';
-    toast(String(e.message || e));
+    // chyba podrobně zalogujeme níže
     log(String(e.message || e));
     running = false;
     elStart.disabled = false;
@@ -328,6 +347,15 @@ async function startBackup(){
 elStart.addEventListener('click', ()=> { if (!running) startBackup(); });
 elReset.addEventListener('click', ()=>{
   if (running) return;
+
+  // uvolni případnou blob URL z minula
+  if (elDL.href && elDL.href.startsWith('blob:')) {
+    URL.revokeObjectURL(elDL.href);
+  }
+  elDL.removeAttribute('href');
+  elDL.textContent = 'Stáhnout ZIP (ručně)';
+  elDL.onclick = null; // při dalším dokončení se znovu nastaví
+
   elBar.style.width = '0%'; elPct.textContent='0%'; elCount.textContent='0 / 0';
   elDL.style.display='none'; elReset.style.display='none';
   elStatus.textContent='Připraveno'; uiState('');
