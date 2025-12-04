@@ -576,88 +576,29 @@ if (!isTokenValid($apiToken)) {
                     throw new Error(data.error || 'Chyba při vytváření zálohy');
                 }
                 
-                // Pokud máme job_id, pollovat status
-                if (data.job_id) {
-                    let pollCount = 0;
-                    const startTime = Date.now();
-                    
-                    progressText.textContent = 'Záloha byla zahájena, čekám na dokončení...';
-                    
-                    // Pollovat status každé 2 sekundy
-                    const pollStatus = async () => {
-                        try {
-                            pollCount++;
-                            const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-                            const elapsedMinutes = Math.floor(elapsedSeconds / 60);
-                            const elapsedText = elapsedMinutes > 0 
-                                ? `${elapsedMinutes} min ${elapsedSeconds % 60} s`
-                                : `${elapsedSeconds} s`;
-                            
-                            const statusResponse = await fetch('api.php?token=' + encodeURIComponent(API_TOKEN) + '&status=' + encodeURIComponent(data.job_id));
-                            const statusData = await statusResponse.json();
-                            
-                            if (statusData.status === 'completed') {
-                                progressText.textContent = 'Hotovo! Záloha byla úspěšně vytvořena.';
-                                
-                                // Zobrazit výsledek
-                                resultDiv.className = 'result success';
-                                resultDiv.style.display = 'block';
-                                resultDiv.innerHTML = `
-                                    <h3>✅ Záloha byla úspěšně vytvořena!</h3>
-                                    <p>Počet souborů: ${statusData.files_count || 0}</p>
-                                    <p>Čas vytváření: ${elapsedText}</p>
-                                    ${statusData.errors && statusData.errors.length > 0 ? 
-                                        '<p style="color: #856404;">Varování: ' + statusData.errors.join(', ') + '</p>' : ''}
-                                    <button class="download-link" onclick="downloadBackup('${statusData.zip_file}')">
-                                        📥 Stáhnout zálohu: ${statusData.zip_file}
-                                    </button>
-                                `;
-                                
-                                // Aktualizovat seznam záloh
-                                loadBackups();
-                                
-                                startBtn.disabled = false;
-                                setTimeout(() => {
-                                    progressContainer.style.display = 'none';
-                                }, 2000);
-                            } else if (statusData.status === 'error') {
-                                throw new Error(statusData.error || 'Chyba při vytváření zálohy');
-                            } else {
-                                // Zobrazit textový status s časem
-                                progressText.textContent = `Záloha běží na pozadí... (${elapsedText})`;
-                                
-                                // Pokračovat v pollingu
-                                setTimeout(pollStatus, 2000);
-                            }
-                        } catch (error) {
-                            throw error;
-                        }
-                    };
-                    
-                    // Začít pollovat po 2 sekundách
-                    setTimeout(pollStatus, 2000);
-                } else {
-                    // Fallback pro starší verzi API (bez job_id)
-                    progressText.textContent = 'Hotovo!';
-                    
-                    resultDiv.className = 'result success';
-                    resultDiv.style.display = 'block';
-                    resultDiv.innerHTML = `
-                        <h3>✅ Záloha byla úspěšně vytvořena!</h3>
-                        <p>Počet souborů: ${data.files_count || 0}</p>
-                        ${data.errors && data.errors.length > 0 ? 
-                            '<p style="color: #856404;">Varování: ' + data.errors.join(', ') + '</p>' : ''}
-                        <button class="download-link" onclick="downloadBackup('${data.zip_file}')">
-                            📥 Stáhnout zálohu: ${data.zip_file}
-                        </button>
-                    `;
-                    
-                    loadBackups();
-                    startBtn.disabled = false;
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-                    }, 2000);
-                }
+                // Záloha byla dokončena synchronně
+                progressText.textContent = 'Hotovo! Záloha byla úspěšně vytvořena.';
+                
+                // Zobrazit výsledek
+                resultDiv.className = 'result success';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h3>✅ Záloha byla úspěšně vytvořena!</h3>
+                    <p>Počet souborů: ${data.files_count || 0}</p>
+                    ${data.errors && data.errors.length > 0 ? 
+                        '<p style="color: #856404;">Varování: ' + data.errors.join(', ') + '</p>' : ''}
+                    <button class="download-link" onclick="downloadBackup('${data.zip_file}')">
+                        📥 Stáhnout zálohu: ${data.zip_file}
+                    </button>
+                `;
+                
+                // Aktualizovat seznam záloh
+                loadBackups();
+                
+                startBtn.disabled = false;
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                }, 2000);
                 
             } catch (error) {
                 progressText.textContent = 'Chyba!';

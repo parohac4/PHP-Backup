@@ -31,7 +31,7 @@ Require all denied
 
 # ===== OCHRANA CITLIVÝCH SOUBORŮ =====
 # Zakázat přístup k citlivým souborům
-<FilesMatch "^(config\.php|BackupManager\.php|backup\.log|\.rate_limit|\.backup\.lock|generate-token\.php)$">
+<FilesMatch "^(config\.php|BackupManager\.php|backup\.log|\.rate_limit|\.backup\.lock|generate-token\.php|backup-worker\.php)$">
     Require all denied
 </FilesMatch>
 

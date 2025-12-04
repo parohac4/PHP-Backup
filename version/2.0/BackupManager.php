@@ -27,8 +27,9 @@ class BackupManager {
      * Vytvoří kompletní zálohu (soubory + databáze)
      * @param string $mode Režim zálohy: 'both', 'files', 'database'
      * @param array|null $databases Databázové přístupy (volitelné, pokud null použije z config)
+     * @param callable|null $statusCallback Callback pro aktualizaci statusu (volitelné)
      */
-    public function createBackup(string $mode = 'both', ?array $databases = null): array {
+    public function createBackup(string $mode = 'both', ?array $databases = null, ?callable $statusCallback = null): array {
         $this->log("=== Začátek zálohy (režim: $mode) ===");
         
         $errors = [];
@@ -55,8 +56,14 @@ class BackupManager {
         // Záloha souborů - přidávat přímo do ZIPu po dávkách
         if ($mode === 'files' || $mode === 'both') {
             try {
-                $filesCount += $this->addFilesToZip($zipPath, $password);
+                if ($statusCallback) {
+                    $statusCallback('Skenování souborů...');
+                }
+                $filesCount += $this->addFilesToZip($zipPath, $password, $statusCallback);
                 $this->log("Přidáno $filesCount souborů do zálohy");
+                if ($statusCallback) {
+                    $statusCallback("Zpracováno $filesCount souborů");
+                }
             } catch (Exception $e) {
                 $errors[] = "Chyba při skenování souborů: " . $e->getMessage();
                 $this->log("CHYBA: " . $e->getMessage());
@@ -66,6 +73,9 @@ class BackupManager {
         // Záloha databází
         if ($mode === 'database' || $mode === 'both') {
             try {
+                if ($statusCallback) {
+                    $statusCallback('Zálohování databází...');
+                }
                 // Použít databáze z parametru nebo z config
                 $dbList = $databases ?? $this->config['databases'] ?? [];
                 if (empty($dbList)) {
@@ -74,6 +84,9 @@ class BackupManager {
                 $dbFilesCount = $this->addDatabasesToZip($zipPath, $dbList, $password);
                 $this->log("Přidáno $dbFilesCount databázových dumpů");
                 $filesCount += $dbFilesCount;
+                if ($statusCallback) {
+                    $statusCallback("Zpracováno $dbFilesCount databází");
+                }
             } catch (Exception $e) {
                 $errors[] = "Chyba při dumpu databází: " . $e->getMessage();
                 $this->log("CHYBA: " . $e->getMessage());
@@ -103,7 +116,7 @@ class BackupManager {
      * Přidá soubory do ZIP archivu postupně pomocí iteratoru po dávkách
      * ZIP se otevírá a zavírá pro každou dávku, aby se uvolnila paměť
      */
-    private function addFilesToZip(string $zipPath, string $password = ''): int {
+    private function addFilesToZip(string $zipPath, string $password = '', ?callable $statusCallback = null): int {
         $root = $this->config['backup_root'];
         
         if (empty($root)) {
@@ -284,6 +297,11 @@ class BackupManager {
                         @set_time_limit(3600);
                     }
                     $this->log("Zpracováno $processed souborů, přidáno $added do ZIPu (vyloučeno: $excludedCount)");
+                    
+                    // Aktualizovat status každých 1000 souborů
+                    if ($statusCallback && $processed % 1000 === 0) {
+                        $statusCallback("Zpracováno $processed souborů...");
+                    }
                 }
             } else {
                 $excludedCount++;
@@ -291,6 +309,10 @@ class BackupManager {
         }
         
         $this->log("Celkem zpracováno: $processed souborů, vyloučeno: $excludedCount");
+        
+        if ($statusCallback) {
+            $statusCallback("Hotovo: $added souborů přidáno do zálohy");
+        }
         
         // Zpracovat zbývající soubory
         if (!empty($batch)) {

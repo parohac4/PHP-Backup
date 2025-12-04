@@ -248,17 +248,23 @@ try {
         // Status zálohy
         if (isset($_GET['status'])) {
             $jobId = basename($_GET['status']);
+            // Sanitize job_id - povolit jen alfanumerické znaky, tečky a podtržítka
+            if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $jobId)) {
+                errorResponse('Neplatné job ID', 400);
+            }
             $statusFile = $config['backup_dir'] . '/.status_' . $jobId . '.json';
             
             if (file_exists($statusFile)) {
-                $status = json_decode(file_get_contents($statusFile), true);
-                if ($status) {
+                $statusContent = file_get_contents($statusFile);
+                $status = json_decode($statusContent, true);
+                if ($status && is_array($status)) {
                     jsonResponse($status);
                 } else {
-                    errorResponse('Chyba při načítání statusu', 500);
+                    error_log("Invalid status file content for job $jobId: " . substr($statusContent, 0, 200));
+                    errorResponse('Chyba při načítání statusu: neplatný JSON', 500);
                 }
             } else {
-                errorResponse('Status zálohy neexistuje', 404);
+                errorResponse('Status zálohy neexistuje (job_id: ' . htmlspecialchars($jobId) . ')', 404);
             }
         }
         
@@ -335,19 +341,19 @@ try {
         
         // Vytvořit zálohu s databázemi z POST nebo z config
         try {
-            // Vytvořit job ID pro tracking
-            $jobId = uniqid('backup_', true);
-            $statusFile = $config['backup_dir'] . '/.status_' . $jobId . '.json';
+            // Zajistit, že všechny výstupy jsou zachyceny
+            // JSON hlavička je už nastavena na začátku souboru
             
-            // Okamžitě vrátit JSON odpověď a nechat zálohu běžet na pozadí
-            $response = [
-                'success' => true,
-                'message' => 'Záloha byla zahájena',
-                'job_id' => $jobId,
-                'status' => 'processing',
-            ];
+            // Spustit zálohu přímo (synchronně)
+            $result = $backupManager->createBackup($mode, $databases);
             
-            // Vymazat všechny buffery
+            // Vymazat databázové přístupy z paměti (bezpečnost)
+            if ($databases !== null) {
+                unset($input['databases']);
+                $databases = null;
+            }
+            
+            // Zajistit, že všechny výstupy jsou zachyceny před odesláním JSON
             while (ob_get_level()) {
                 ob_end_clean();
             }
@@ -358,6 +364,14 @@ try {
             header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             header('Pragma: no-cache');
             
+            $response = [
+                'success' => true,
+                'message' => 'Záloha byla úspěšně vytvořena',
+                'zip_file' => $result['zip_file'],
+                'files_count' => $result['files_count'],
+                'errors' => $result['errors'] ?? [],
+            ];
+            
             $json = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
             if ($json === false) {
                 throw new Exception('Chyba při kódování JSON odpovědi: ' . json_last_error_msg());
@@ -365,57 +379,23 @@ try {
             
             echo $json;
             
-            // Ukončit HTTP odpověď a nechat zálohu běžet na pozadí
+            // Ukončit skript
             if (function_exists('fastcgi_finish_request')) {
                 fastcgi_finish_request();
-            } else {
-                // Fallback pro non-FPM prostředí
-                if (ob_get_level()) {
-                    ob_end_flush();
-                }
-                flush();
             }
-            
-            // Záloha běží na pozadí
-            try {
-                // Uložit status: processing
-                file_put_contents($statusFile, json_encode([
-                    'job_id' => $jobId,
-                    'status' => 'processing',
-                    'started_at' => date('Y-m-d H:i:s'),
-                    'mode' => $mode,
-                ]));
-                
-                $result = $backupManager->createBackup($mode, $databases);
-                
-                // Vymazat databázové přístupy z paměti (bezpečnost)
-                if ($databases !== null) {
-                    unset($input['databases']);
-                    $databases = null;
-                }
-                
-                // Uložit status: completed
-                file_put_contents($statusFile, json_encode([
-                    'job_id' => $jobId,
-                    'status' => 'completed',
-                    'started_at' => date('Y-m-d H:i:s'),
-                    'completed_at' => date('Y-m-d H:i:s'),
-                    'zip_file' => $result['zip_file'],
-                    'files_count' => $result['files_count'],
-                    'errors' => $result['errors'] ?? [],
-                ]));
-            } catch (Throwable $e) {
-                // Uložit status: error
-                file_put_contents($statusFile, json_encode([
-                    'job_id' => $jobId,
-                    'status' => 'error',
-                    'started_at' => date('Y-m-d H:i:s'),
-                    'error' => $e->getMessage(),
-                ]));
-            }
-            
             exit;
         } catch (Throwable $e) {
+            // Pokud máme job_id, uložit status: error
+            if (isset($jobId) && isset($statusFile)) {
+                $errorData = [
+                    'job_id' => $jobId,
+                    'status' => 'error',
+                    'started_at' => $statusData['started_at'] ?? date('Y-m-d H:i:s'),
+                    'error' => $e->getMessage(),
+                ];
+                @file_put_contents($statusFile, json_encode($errorData, JSON_UNESCAPED_UNICODE));
+            }
+            
             // Vymazat databázové přístupy z paměti před vrácením chyby
             if ($databases !== null) {
                 unset($input['databases']);
