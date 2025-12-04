@@ -1,0 +1,16 @@
+# Zálohy
+backups/
+*.zip
+
+# Logy
+*.log
+backup.log
+
+# Dočasné soubory
+.rate_limit
+.backup.lock
+*.tmp
+
+# Konfigurace (obsahuje citlivé údaje)
+# config.php - NEPŘIDÁVEJTE DO GIT!
+

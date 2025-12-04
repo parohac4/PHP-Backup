@@ -1,0 +1,21 @@
+# Ochrana setup adresáře
+# PO DOKONČENÍ NASTAVENÍ TOHOTO ADRESÁŘE SMAŽTE!
+
+# Možnost 1: Omezit přístup pouze z localhost (odkomentujte, pokud chcete)
+# <RequireAll>
+#     Require ip 127.0.0.1
+#     Require ip ::1
+# </RequireAll>
+
+# Možnost 2: Omezit přístup pomocí IP whitelistu (odkomentujte a upravte)
+# <RequireAny>
+#     Require ip VAŠE_IP_ADRESA_IPv4
+#     Require ip VAŠE_IP_ADRESA_IPv6
+# </RequireAny>
+
+# Možnost 3: Úplně zakázat přístup (odkomentujte po dokončení setupu)
+# Require all denied
+
+# Poznámka: Pokud necháte prázdné, adresář bude přístupný všem
+# DOPORUČUJEME: Po dokončení nastavení tokenu tento adresář SMAZAT!
+

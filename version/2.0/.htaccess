@@ -1,0 +1,45 @@
+# PHP Backup Tool v2.0 - Bezpečnostní nastavení s IP whitelistem
+# Kompatibilní s VEDOS hostingem
+
+# ===== IP WHITELIST =====
+# DŮLEŽITÉ: Přidejte své IP adresy do seznamu níže!
+# 
+# Jak zjistit svou IP adresu:
+# - Navštivte: https://www.whatismyip.com/
+# - Nebo použijte příkaz: curl ifconfig.me
+#
+# Formát:
+# - IPv4: Require ip 192.168.1.100
+# - IPv6: Require ip 2001:0db8:85a3::8a2e:0370:7334
+# - Rozsah: Require ip 192.168.1.0/24
+
+<RequireAny>
+    # ZDE PŘIDEJTE SVÉ IP ADRESY:
+     Require ip 46.28.104.66
+     Require ip 2a02:2b88:1:7:f0b0:ffc5:61fe:4b4e
+    
+    # Příklad:
+    # Require ip 192.168.1.100
+    # Require ip 2001:0db8:85a3::8a2e:0370:7334
+    
+    # Pokud potřebujete povolit rozsah IP adres:
+    # Require ip 192.168.1.0/24
+</RequireAny>
+
+# Pokud žádná IP neodpovídá, zamítnout přístup
+Require all denied
+
+# ===== OCHRANA CITLIVÝCH SOUBORŮ =====
+# Zakázat přístup k citlivým souborům
+<FilesMatch "^(config\.php|BackupManager\.php|backup\.log|\.rate_limit|\.backup\.lock|generate-token\.php)$">
+    Require all denied
+</FilesMatch>
+
+# Zakázat přístup k dočasným souborům
+<FilesMatch "\.(tmp|log|lock)$">
+    Require all denied
+</FilesMatch>
+
+# ===== POZNÁMKY =====
+# - Setup adresář má vlastní .htaccess s IP ochranou
+# - Adresář backups/ je chráněn samostatným .htaccess souborem
