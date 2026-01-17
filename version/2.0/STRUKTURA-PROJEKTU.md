@@ -80,3 +80,5 @@ Po dokončení nastavení můžete smazat:
 
 **Verze:** 2.0
 
+
+

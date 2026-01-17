@@ -32,3 +32,5 @@ echo "Příklad:\n";
 echo "Před: 'api_token' => 'ZMENTE_TENTO_TOKEN_NA_SILNY_NAHODNY_STRING',\n";
 echo "Po:   'api_token' => '" . $token . "',\n\n";
 
+
+

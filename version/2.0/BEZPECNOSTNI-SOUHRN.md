@@ -71,3 +71,5 @@ chmod 644 *.php
 **Verze:** 2.0  
 **Datum:** 2024
 
+
+

@@ -56,3 +56,5 @@
 3. Otestovat na menší zálohě, zda funguje
 4. Přidat lepší error handling a logování
 
+
+

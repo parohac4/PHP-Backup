@@ -176,3 +176,5 @@ Pokud najdete bezpečnostní chybu, kontaktujte vývojáře okamžitě.
 **Poslední aktualizace:** 2024
 **Verze:** 2.0
 
+
+

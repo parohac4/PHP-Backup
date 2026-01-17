@@ -58,3 +58,5 @@ chmod 644 .htaccess
 
 **Po dokončení všech kontrol je projekt připraven k nasazení!**
 
+
+

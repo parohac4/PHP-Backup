@@ -64,3 +64,5 @@ Pokud potřebujete změnit token později:
 
 **PO DOKONČENÍ NASTAVENÍ TENTO ADRESÁŘ SMAŽTE!**
 
+
+
