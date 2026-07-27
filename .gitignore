@@ -1,0 +1,13 @@
+# Datový adresář – konfigurace, hesla, session, archivy. Nikdy do gitu!
+/data/
+
+# Archivy záloh
+*.zip
+*.sql
+*.sql.gz
+
+# Editory a OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
