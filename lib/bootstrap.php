@@ -13,7 +13,7 @@ if (PHP_VERSION_ID < 70400) {
     exit("PHP Backup Tool vyžaduje PHP 7.4 nebo novější (nalezeno " . PHP_VERSION . ").\n");
 }
 
-const PB_VERSION = '4.0';
+const PB_VERSION = '4.1';
 
 // Kořen nástroje a datový adresář.
 define('PB_ROOT', dirname(__DIR__));
