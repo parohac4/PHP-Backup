@@ -30,6 +30,14 @@ final class Security
     /** @var string|null */
     private static $nonce = null;
 
+    /**
+     * Hlavní klíč dodaný mimo session (z API tokenu). Platí jen pro aktuální
+     * požadavek, nikdy se nikam neukládá.
+     *
+     * @var string|null
+     */
+    private static $runtimeMasterKey = null;
+
     // ---------------------------------------------------------------- hlavičky
 
     /** Náhodný nonce pro CSP (inline styl a skript). */
@@ -264,11 +272,23 @@ final class Security
     /** Hlavní klíč přihlášeného uživatele (pro čtení šifrovaných tajemství). */
     public static function masterKey(): ?string
     {
+        if (self::$runtimeMasterKey !== null) {
+            return self::$runtimeMasterKey;
+        }
         if (!self::isLoggedIn() || empty($_SESSION['mk'])) {
             return null;
         }
         $key = base64_decode((string)$_SESSION['mk'], true);
         return $key === false ? null : $key;
+    }
+
+    /**
+     * Nastaví hlavní klíč pro API požadavky bez session (odemčený z API
+     * tokenu). Platí jen po dobu tohoto požadavku – nikdy se neperzistuje.
+     */
+    public static function setRuntimeMasterKey(?string $mk): void
+    {
+        self::$runtimeMasterKey = $mk;
     }
 
     // ------------------------------------------------------------- přihlášení

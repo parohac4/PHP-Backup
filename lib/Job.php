@@ -325,7 +325,40 @@ final class Job
         Storage::log('ZÁLOHA: dokončena ' . $job['zip_base'] . ' – ' . $count . ' část(í), '
             . $size . ' B, ' . $entries . ' položek');
 
+        self::recordBackupMode((string)$job['zip_base'], (string)$job['mode']);
         self::applyRetention((string)$job['zip_base']);
+    }
+
+    /**
+     * Zapamatuje si, v jakém režimu byla záloha vytvořená (soubory / databáze
+     * / obojí). Používá to API při rozhodování, zda smí token s omezeným
+     * oprávněním stažený archiv vůbec vidět – token bez oprávnění k databázi
+     * nesmí stáhnout archiv, který obsahuje export databáze.
+     */
+    private static function recordBackupMode(string $base, string $mode): void
+    {
+        $all = Storage::readData('backup_modes') ?? [];
+        $all[$base] = $mode;
+        // Úklid: záznamy bez odpovídající zálohy na disku jsou zbytečné.
+        $known = array_column(self::listBackups(), 'base');
+        foreach (array_keys($all) as $b) {
+            if (!in_array($b, $known, true) && $b !== $base) {
+                unset($all[$b]);
+            }
+        }
+        Storage::writeData('backup_modes', $all);
+    }
+
+    /**
+     * Režim, ve kterém byla daná záloha vytvořená ('files'/'db'/'both'), nebo
+     * null, pokud to nevíme (starší záloha z doby před touto evidencí). Volající
+     * musí neznámý režim brát jako potenciálně citlivý (obsahuje databázi).
+     */
+    public static function backupModeFor(string $backupFileName): ?string
+    {
+        $base = preg_replace('/(?:_p\d{2,3})?\.zip$/', '', $backupFileName);
+        $all = Storage::readData('backup_modes') ?? [];
+        return isset($all[$base]) ? (string)$all[$base] : null;
     }
 
     /**

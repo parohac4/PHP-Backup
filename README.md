@@ -69,6 +69,43 @@ je z nich nikdo nedostane.
 
 ---
 
+## API pro automatizaci (cron, monitoring)
+
+Zálohu jde spustit i bez webového rozhraní – přes samostatný soubor `api.php`.
+Token na to vytvoříte v **Nastavení → API tokeny pro automatizaci** (zobrazí
+se jen jednou, hned po vytvoření).
+
+Token má vlastní oprávnění (jen soubory / soubory i databáze) a volitelně jde
+omezit na konkrétní IP adresu. Volá se hlavičkou `Authorization: Bearer`,
+vždy jen přes HTTPS.
+
+Záloha běží po krocích stejně jako na webu, proto se `status` volá opakovaně,
+dokud nepřijde `"done": true`:
+
+```bash
+# spuštění
+curl -H "Authorization: Bearer pbkt_xxx" -X POST -d "" \
+  "https://vas-web.cz/cesta/api.php?action=start&mode=files"
+
+# opakovaně, dokud odpověď neobsahuje "done": true
+curl -H "Authorization: Bearer pbkt_xxx" \
+  "https://vas-web.cz/cesta/api.php?action=status"
+
+# stažení hotového archivu (jméno souboru je v odpovědi výše, pole "zip"/"parts")
+curl -H "Authorization: Bearer pbkt_xxx" -o zaloha.zip \
+  "https://vas-web.cz/cesta/api.php?action=download&file=NAZEV_SOUBORU.zip"
+
+# zrušení běžící zálohy
+curl -H "Authorization: Bearer pbkt_xxx" -X POST -d "" \
+  "https://vas-web.cz/cesta/api.php?action=cancel"
+```
+
+`mode` může být `files`, `db` nebo `both` (poslední dva jen s tokenem, který má
+oprávnění k databázi – vyžadují navíc jednou předem uložené přístupy k DB
+přes web s volbou „zapamatovat přístupy“).
+
+---
+
 ## Bezpečnost
 
 Podrobný popis je v [BEZPECNOST.md](BEZPECNOST.md). Ve zkratce:
@@ -144,11 +181,13 @@ symbolické odkazy a vlastní datový adresář nástroje.
 ## Struktura projektu
 
 ```
-index.php          jediný vstupní bod (nastavení, přihlášení, zálohy, stahování)
+index.php          jediný vstupní bod webu (nastavení, přihlášení, zálohy, stahování)
+api.php            vstupní bod pro automatizaci (cron, monitoring) – viz „API pro automatizaci“
 lib/               logika nástroje – z webu nespustitelná
   bootstrap.php      inicializace
   Storage.php        datový adresář, konfigurace, log
   Security.php       hlavičky, session, přihlášení, CSRF, IP, cesty
+  ApiToken.php       správa a ověřování API tokenů
   Crypto.php         šifrování uložených tajemství
   Job.php            řízení úlohy po krocích
   FilesBackup.php    procházení adresáře a balení do ZIP

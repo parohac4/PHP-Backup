@@ -128,6 +128,38 @@ function savedDbCredentials(): ?array
     return is_array($data) ? $data : null;
 }
 
+/**
+ * Rozparsuje seznam IP adres/rozsahů (jeden na řádek). Vrací null při
+ * jakémkoli neplatném záznamu.
+ *
+ * @return list<string>|null
+ */
+function parseIpList(string $raw): ?array
+{
+    $out = [];
+    foreach (preg_split('/\R/', $raw) ?: [] as $line) {
+        $line = trim($line);
+        if ($line === '') {
+            continue;
+        }
+        if (strpos($line, '/') !== false) {
+            [$subnet, $bits] = explode('/', $line, 2);
+            $binary = @inet_pton(trim($subnet));
+            $valid = $binary !== false
+                && ctype_digit($bits)
+                && (int)$bits >= 0
+                && (int)$bits <= strlen($binary) * 8;
+        } else {
+            $valid = filter_var($line, FILTER_VALIDATE_IP) !== false;
+        }
+        if (!$valid) {
+            return null;
+        }
+        $out[] = $line;
+    }
+    return $out;
+}
+
 // =========================================================================
 // 1) Instalace – proběhne jen jednou, dokud neexistuje konfigurace
 // =========================================================================
@@ -453,26 +485,9 @@ if ($isPost) {
             }
         }
 
-        $ipAllow = [];
-        foreach (preg_split('/\R/', (string)($_POST['ip_allow'] ?? '')) ?: [] as $line) {
-            $line = trim($line);
-            if ($line === '') {
-                continue;
-            }
-            if (strpos($line, '/') !== false) {
-                [$subnet, $bits] = explode('/', $line, 2);
-                $binary = @inet_pton(trim($subnet));
-                $valid = $binary !== false
-                    && ctype_digit($bits)
-                    && (int)$bits >= 0
-                    && (int)$bits <= strlen($binary) * 8;
-            } else {
-                $valid = filter_var($line, FILTER_VALIDATE_IP) !== false;
-            }
-            if (!$valid) {
-                redirectSelf('err', 'Neplatný záznam v seznamu IP adres: ' . $line);
-            }
-            $ipAllow[] = $line;
+        $ipAllow = parseIpList((string)($_POST['ip_allow'] ?? ''));
+        if ($ipAllow === null) {
+            redirectSelf('err', 'Neplatný záznam v seznamu IP adres.');
         }
         // Pojistka proti zamknutí sebe sama.
         if ($ipAllow !== []) {
@@ -533,6 +548,40 @@ if ($isPost) {
         Storage::saveConfig($changes);
         Storage::log('NASTAVENÍ: změněno');
         redirectSelf('ok', 'Nastavení bylo uloženo.');
+    }
+
+    if ($action === 'api-token-create') {
+        $name = (string)($_POST['name'] ?? '');
+        $scope = (string)($_POST['scope'] ?? 'files');
+        $ipAllow = parseIpList((string)($_POST['ip_allow'] ?? ''));
+        if ($ipAllow === null) {
+            redirectSelf('err', 'Neplatný záznam v seznamu IP adres tokenu.');
+        }
+        $result = ApiToken::create($name, $scope, $ipAllow, Security::masterKey());
+        $_SESSION['flash_token'] = $result['token'];
+        redirectSelf('ok', 'Token vytvořen. Zkopírujte si ho – zobrazí se už jen teď.');
+    }
+
+    if ($action === 'api-token-update') {
+        $id = (string)($_POST['id'] ?? '');
+        $name = (string)($_POST['name'] ?? '');
+        $scope = (string)($_POST['scope'] ?? 'files');
+        $ipAllow = parseIpList((string)($_POST['ip_allow'] ?? ''));
+        if ($ipAllow === null) {
+            redirectSelf('err', 'Neplatný záznam v seznamu IP adres tokenu.');
+        }
+        if (!ApiToken::update($id, $name, $scope, $ipAllow)) {
+            redirectSelf('err', 'Token nenalezen.');
+        }
+        redirectSelf('ok', 'Token byl upraven.');
+    }
+
+    if ($action === 'api-token-revoke') {
+        $id = (string)($_POST['id'] ?? '');
+        if (!ApiToken::revoke($id)) {
+            redirectSelf('err', 'Token nenalezen.');
+        }
+        redirectSelf('ok', 'Token byl zrušen.');
     }
 
     if ($action === 'password') {

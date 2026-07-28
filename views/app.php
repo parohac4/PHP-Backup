@@ -22,6 +22,10 @@ $running = $job !== null && !in_array((string)$job['phase'], [Job::PHASE_DONE, J
 $savedDb = savedDbCredentials();
 $hasDb = class_exists('mysqli');
 $totalSize = array_sum(array_column($backups, 'size'));
+$apiTokens = ApiToken::publicList();
+$newApiToken = $_SESSION['flash_token'] ?? null;
+unset($_SESSION['flash_token']);
+$apiUrl = preg_replace('/index\.php$/', 'api.php', View::self());
 ?>
 
 <?php if (is_array($flash)): ?>
@@ -295,6 +299,93 @@ $totalSize = array_sum(array_column($backups, 'size'));
             <div class="row">
                 <button type="submit">Změnit heslo</button>
             </div>
+        </form>
+    </details>
+
+    <details>
+        <summary>API tokeny pro automatizaci</summary>
+
+        <?php if (is_string($newApiToken) && $newApiToken !== ''): ?>
+            <p class="msg warn">Nový token – zkopírujte si ho, další zobrazení už nebude možné:<br>
+                <code class="path"><?= View::e($newApiToken) ?></code></p>
+            <p class="hint">Použití: <code>curl -H "Authorization: Bearer &lt;token&gt;" -X POST
+                "https://váš-web/<?= View::e($apiUrl) ?>?action=start&amp;mode=files"</code>,
+                dál opakovaně <code>?action=status</code>, dokud odpověď neobsahuje <code>"done": true</code>.</p>
+        <?php endif; ?>
+
+        <p class="hint">Token umí jen spustit/sledovat/zrušit zálohu a stáhnout hotový archiv přes
+            samostatný soubor <code><?= View::e($apiUrl) ?></code> – nikdy nezmění nastavení, nesmaže
+            zálohu ani nepřidá další token. Volá se hlavičkou <code>Authorization: Bearer …</code>,
+            vyžaduje HTTPS bez ohledu na nastavení výše.</p>
+
+        <?php if ($apiTokens === []): ?>
+            <p class="hint">Zatím žádné tokeny.</p>
+        <?php else: ?>
+        <div class="tablewrap">
+        <table>
+            <tr>
+                <th>Název</th><th>Vytvořen</th><th>Použito naposled</th>
+                <th>Oprávnění</th><th>IP omezení</th><th></th>
+            </tr>
+            <?php foreach ($apiTokens as $t): ?>
+            <tr>
+                <td><?= View::e($t['name']) ?></td>
+                <td class="date"><?= View::e(View::dateTime($t['created'])) ?></td>
+                <td class="date"><?= $t['last_used'] !== null ? View::e(View::dateTime($t['last_used'])) : '—' ?></td>
+                <td><?= $t['scope'] === 'files_db' ? 'Soubory i databáze' : 'Jen soubory' ?></td>
+                <td><?= $t['ip_allow'] !== [] ? View::e(implode(', ', $t['ip_allow'])) : '—' ?></td>
+                <td class="num">
+                    <details>
+                        <summary>Upravit</summary>
+                        <form method="post">
+                            <input type="hidden" name="action" value="api-token-update">
+                            <input type="hidden" name="_csrf" value="<?= View::e($csrf) ?>">
+                            <input type="hidden" name="id" value="<?= View::e($t['id']) ?>">
+                            <label>Název
+                                <input type="text" name="name" maxlength="60" required
+                                    value="<?= View::e($t['name']) ?>">
+                            </label>
+                            <label class="inline">
+                                <input type="radio" name="scope" value="files"
+                                    <?= $t['scope'] !== 'files_db' ? 'checked' : '' ?>> Jen soubory
+                            </label>
+                            <label class="inline">
+                                <input type="radio" name="scope" value="files_db"
+                                    <?= (!$hasDb) ? 'disabled' : '' ?>
+                                    <?= $t['scope'] === 'files_db' ? 'checked' : '' ?>> Soubory i databáze
+                            </label>
+                            <label>Omezit na IP adresy (nepovinné, jedna na řádek)
+                                <textarea name="ip_allow"><?= View::e(implode("\n", $t['ip_allow'])) ?></textarea>
+                            </label>
+                            <div class="row"><button type="submit">Uložit změny</button></div>
+                        </form>
+                    </details>
+                    <form method="post">
+                        <input type="hidden" name="action" value="api-token-revoke">
+                        <input type="hidden" name="_csrf" value="<?= View::e($csrf) ?>">
+                        <input type="hidden" name="id" value="<?= View::e($t['id']) ?>">
+                        <button type="submit" class="danger">Zrušit</button>
+                    </form>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+        </div>
+        <?php endif; ?>
+
+        <h3>Vytvořit nový token</h3>
+        <form method="post">
+            <input type="hidden" name="action" value="api-token-create">
+            <input type="hidden" name="_csrf" value="<?= View::e($csrf) ?>">
+            <label for="api_name">Název</label>
+            <input type="text" id="api_name" name="name" maxlength="60" required placeholder="např. cron-noční">
+            <label class="inline"><input type="radio" name="scope" value="files" checked> Jen soubory</label>
+            <label class="inline">
+                <input type="radio" name="scope" value="files_db" <?= (!$hasDb) ? 'disabled' : '' ?>> Soubory i databáze
+            </label>
+            <label for="api_ip_allow">Omezit na IP adresy (nepovinné, jedna na řádek)</label>
+            <textarea id="api_ip_allow" name="ip_allow"></textarea>
+            <div class="row"><button type="submit">Vytvořit token</button></div>
         </form>
     </details>
 

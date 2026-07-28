@@ -31,6 +31,7 @@ umask(0077);
 require_once __DIR__ . '/Storage.php';
 require_once __DIR__ . '/Crypto.php';
 require_once __DIR__ . '/Security.php';
+require_once __DIR__ . '/ApiToken.php';
 require_once __DIR__ . '/Job.php';
 require_once __DIR__ . '/FilesBackup.php';
 require_once __DIR__ . '/SqlDump.php';
